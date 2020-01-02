@@ -5,10 +5,10 @@
  * in both HEX and ASCII forms.
  *
  * Compile with:
- *   $ gcc -o hexdump[.exe] hexdump.c
+ *   $ gcc -Ofast -o hexdump[.exe] hexdump.c
  *
  *
- * Copyright 2019 (C) Samantaz Fox
+ * Copyright 2019-2020 (C) Samantaz Fox
  *
  * This file is in the public domain.
  * Feel free to copy, modify or redistribute it!
@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <time.h>
+
+
+# define MAX_BUFFER_SIZE (1024 * 1024 * 32)  // 32 MiB
 
 
 static void row2hex(char* data, size_t len)
@@ -96,9 +99,9 @@ static void printUsage(void)
 }
 
 
-void dump(char* buffer, uint size)
+void dump(char* buffer, long unsigned int size)
 {
-	for (uint done = 0; done <= size; done += 16)
+	for (long unsigned int done = 0; done <= size; done += 16)
 	{
 		char* data_current = (char*) (buffer + done);
 		long int todo = (size - done);
@@ -128,8 +131,8 @@ int main(int argc, char* argv[])
 	}
 
 
-	// Allocate 1024 blocks of 1KiB (total = 1MiB)
-	uint8_t* buffer = calloc(1024 * 1024, 1);
+	// Allocate a buffer (see #define above for size)
+	uint8_t* buffer = calloc(MAX_BUFFER_SIZE, 1);
 	if (buffer == NULL)
 	{
 		fprintf(stderr, "Failed to allocate buffer\n");
@@ -138,7 +141,7 @@ int main(int argc, char* argv[])
 
 
 	// Copy file's data to buffer.
-	size_t filesize = fread(buffer, 1, (1024 * 1024), fd);
+	size_t filesize = fread(buffer, 1, MAX_BUFFER_SIZE, fd);
 	if (!filesize)
 	{
 		fprintf(stderr, "Error: File is too large\n");
@@ -150,8 +153,12 @@ int main(int argc, char* argv[])
 
 	// Generate dump
 	dump(buffer, filesize);
-	printf("\nDump Done\n");
-	printf("Parsed %ld bytes in %ld ms\n", filesize, (clock() / (CLOCKS_PER_SEC/1000)) ); // timer.ElapsedMilliseconds
+
+	fprintf(stderr, "\nDump Done\n");
+	fprintf(stderr,
+		"Parsed %ld bytes in %ld ms\n",
+		filesize, (clock() / (CLOCKS_PER_SEC/1000))
+	);
 
 
 	free(buffer);
