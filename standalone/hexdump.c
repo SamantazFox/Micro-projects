@@ -22,31 +22,13 @@
 #include <time.h>
 
 
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-
-/*
- * Converts the byte to a visible ASCII character or dot if it is not.
-*/
-static inline char bin2ascii(uint8_t b)
-{
-	if (b >= 32 && b <= 126) { return (char) b; }
-	return '.';
-}
-
-static inline char bin2hex(uint8_t b)
-{
-	if (b < 10) return (b - '0');
-	if (b < 16) return (b - 'A');
-	return '0';
-}
-
-
-static void row2hex(uint8_t* data, size_t len)
+static void row2hex(char* data, size_t len)
 {
   /* String length:   1    2    3    4    5    6    7    8 */
 	char string_1[] = "   ""   ""   ""   ""   ""   ""   ""   ";
 	char string_2[] = "   ""   ""   ""   ""   ""   ""   ""   ";
 
+	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch(len)
 	{
 		/* High 8 bytes */
@@ -72,10 +54,13 @@ static void row2hex(uint8_t* data, size_t len)
 	printf("[ %s %s] ", string_1, string_2 );
 }
 
-static void row2ascii(uint8_t* data, size_t len)
+static void row2ascii(char* data, size_t len)
 {
+	#define bin2ascii(b)  ( (char) ((b) >= 32 && (b) <= 126) ? (b) : '.' )
+
 	char str[17] ="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
+	#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch(len)
 	{
 		/* High 8 bytes */
@@ -108,6 +93,24 @@ static void row2ascii(uint8_t* data, size_t len)
 static void printUsage(void)
 {
 	printf("usage: hexdump.exe <filename>\n");
+}
+
+
+void dump(char* buffer, uint size)
+{
+	for (uint done = 0; done <= size; done += 16)
+	{
+		char* data_current = (char*) (buffer + done);
+		long int todo = (size - done);
+
+		if (todo <= 0) { printf("\n"); return; }
+		int line = (todo > 16) ? 16 : (todo);
+
+		// Print address + data as HEX + data as ASCII
+		printf("\t\t0x%.8lx: ", done);
+		row2hex  (data_current, line);
+		row2ascii(data_current, line);
+	}
 }
 
 
@@ -145,37 +148,11 @@ int main(int argc, char* argv[])
 	fclose(fd);
 
 
-	// Count lines
-	size_t fullLines = (size_t) (filesize >> 4); // div by 16
-	size_t lastLine  = (size_t) (filesize - (fullLines << 4));
-
-
-	for (size_t i = 0; i < fullLines; i++)
-	{
-		// Read chunks of 16 bytes
-		long int data_offset = (i << 4); // mul by 16
-		uint8_t* data_current = (uint8_t*) (buffer + data_offset);
-
-		// Print address + data as HEX + data as ASCII
-		printf("0x%.8lx: ", data_offset);
-		row2hex(data_current, 16);
-		row2ascii(data_current, 16);
-	}
-
-	if (lastLine)
-	{
-		// Read the last chunks of bytes
-		long int data_offset = ((fullLines+1) << 4); // mul by 16
-		uint8_t* data_current = (uint8_t*) (buffer + data_offset);
-
-		// Print address + data as HEX + data as ASCII
-		printf("0x%.8lx: ", data_offset);
-		row2hex(data_current, lastLine);
-		row2ascii(data_current, lastLine);
-	}
-
+	// Generate dump
+	dump(buffer, filesize);
 	printf("\nDump Done\n");
 	printf("Parsed %ld bytes in %ld ms\n", filesize, (clock() / (CLOCKS_PER_SEC/1000)) ); // timer.ElapsedMilliseconds
+
 
 	free(buffer);
 	return 0;
