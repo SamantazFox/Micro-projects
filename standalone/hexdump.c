@@ -27,6 +27,13 @@
 
 static void row2hex(char* data, size_t len)
 {
+	#define data2hex(out, data_in) ({ \
+		char hi = (char) ((data_in) & 0xF0) >> 4; \
+		char lo = (char) ((data_in) & 0x0F) >> 0; \
+		*((out)+0) = (char) ( (hi < 10) ? (hi + '0') : (hi - 10 + 'A') ); \
+		*((out)+1) = (char) ( (lo < 10) ? (lo + '0') : (lo - 10 + 'A') ); \
+	})
+
   /* String length:   1    2    3    4    5    6    7    8 */
 	char string_1[] = "   ""   ""   ""   ""   ""   ""   ""   ";
 	char string_2[] = "   ""   ""   ""   ""   ""   ""   ""   ";
@@ -35,23 +42,23 @@ static void row2hex(char* data, size_t len)
 	switch(len)
 	{
 		/* High 8 bytes */
-		case 16: snprintf(string_2 + 21, 3, "%.2X", (char) data[15] ); string_2[23] = ' ';
-		case 15: snprintf(string_2 + 18, 3, "%.2X", (char) data[14] ); string_2[20] = ' ';
-		case 14: snprintf(string_2 + 15, 3, "%.2X", (char) data[13] ); string_2[17] = ' ';
-		case 13: snprintf(string_2 + 12, 3, "%.2X", (char) data[12] ); string_2[14] = ' ';
-		case 12: snprintf(string_2 +  9, 3, "%.2X", (char) data[11] ); string_2[11] = ' ';
-		case 11: snprintf(string_2 +  6, 3, "%.2X", (char) data[10] ); string_2[ 8] = ' ';
-		case 10: snprintf(string_2 +  3, 3, "%.2X", (char) data[ 9] ); string_2[ 5] = ' ';
-		case  9: snprintf(string_2 +  0, 3, "%.2X", (char) data[ 8] ); string_2[ 2] = ' ';
+		case 16: data2hex(string_2 + 21, (char) data[15] );
+		case 15: data2hex(string_2 + 18, (char) data[14] );
+		case 14: data2hex(string_2 + 15, (char) data[13] );
+		case 13: data2hex(string_2 + 12, (char) data[12] );
+		case 12: data2hex(string_2 +  9, (char) data[11] );
+		case 11: data2hex(string_2 +  6, (char) data[10] );
+		case 10: data2hex(string_2 +  3, (char) data[ 9] );
+		case  9: data2hex(string_2 +  0, (char) data[ 8] );
 		/* Low 8 bytes */
-		case  8: snprintf(string_1 + 21, 3, "%.2X", (char) data[ 7] ); string_1[23] = ' ';
-		case  7: snprintf(string_1 + 18, 3, "%.2X", (char) data[ 6] ); string_1[20] = ' ';
-		case  6: snprintf(string_1 + 15, 3, "%.2X", (char) data[ 5] ); string_1[17] = ' ';
-		case  5: snprintf(string_1 + 12, 3, "%.2X", (char) data[ 4] ); string_1[14] = ' ';
-		case  4: snprintf(string_1 +  9, 3, "%.2X", (char) data[ 3] ); string_1[11] = ' ';
-		case  3: snprintf(string_1 +  6, 3, "%.2X", (char) data[ 2] ); string_1[ 8] = ' ';
-		case  2: snprintf(string_1 +  3, 3, "%.2X", (char) data[ 1] ); string_1[ 5] = ' ';
-		case  1: snprintf(string_1 +  0, 3, "%.2X", (char) data[ 0] ); string_1[ 2] = ' ';
+		case  8: data2hex(string_1 + 21, (char) data[ 7] );
+		case  7: data2hex(string_1 + 18, (char) data[ 6] );
+		case  6: data2hex(string_1 + 15, (char) data[ 5] );
+		case  5: data2hex(string_1 + 12, (char) data[ 4] );
+		case  4: data2hex(string_1 +  9, (char) data[ 3] );
+		case  3: data2hex(string_1 +  6, (char) data[ 2] );
+		case  2: data2hex(string_1 +  3, (char) data[ 1] );
+		case  1: data2hex(string_1 +  0, (char) data[ 0] );
 	}
 
 	printf("[ %s %s] ", string_1, string_2 );
