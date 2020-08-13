@@ -25,13 +25,13 @@
 # define MAX_BUFFER_SIZE (1024 * 1024 * 32)  // 32 MiB
 
 
-static void row2hex(char* data, size_t len)
+static void row2hex(uint8_t* data, size_t len)
 {
 	#define data2hex(out, data_in) ({ \
-		char hi = (char) ((data_in) & 0xF0) >> 4; \
-		char lo = (char) ((data_in) & 0x0F) >> 0; \
-		*((out)+0) = (char) ( (hi < 10) ? (hi + '0') : (hi - 10 + 'A') ); \
-		*((out)+1) = (char) ( (lo < 10) ? (lo + '0') : (lo - 10 + 'A') ); \
+		uint8_t hi = (uint8_t) ((data_in) & 0xF0) >> 4; \
+		uint8_t lo = (uint8_t) ((data_in) & 0x0F) >> 0; \
+		*((out)+0) = (uint8_t) ( (hi < 10) ? (hi + '0') : (hi - 10 + 'A') ); \
+		*((out)+1) = (uint8_t) ( (lo < 10) ? (lo + '0') : (lo - 10 + 'A') ); \
 	})
 
   /* String length:   1    2    3    4    5    6    7    8 */
@@ -42,31 +42,31 @@ static void row2hex(char* data, size_t len)
 	switch(len)
 	{
 		/* High 8 bytes */
-		case 16: data2hex(string_2 + 21, (char) data[15] );
-		case 15: data2hex(string_2 + 18, (char) data[14] );
-		case 14: data2hex(string_2 + 15, (char) data[13] );
-		case 13: data2hex(string_2 + 12, (char) data[12] );
-		case 12: data2hex(string_2 +  9, (char) data[11] );
-		case 11: data2hex(string_2 +  6, (char) data[10] );
-		case 10: data2hex(string_2 +  3, (char) data[ 9] );
-		case  9: data2hex(string_2 +  0, (char) data[ 8] );
+		case 16: data2hex(string_2 + 21, (uint8_t) data[15] );
+		case 15: data2hex(string_2 + 18, (uint8_t) data[14] );
+		case 14: data2hex(string_2 + 15, (uint8_t) data[13] );
+		case 13: data2hex(string_2 + 12, (uint8_t) data[12] );
+		case 12: data2hex(string_2 +  9, (uint8_t) data[11] );
+		case 11: data2hex(string_2 +  6, (uint8_t) data[10] );
+		case 10: data2hex(string_2 +  3, (uint8_t) data[ 9] );
+		case  9: data2hex(string_2 +  0, (uint8_t) data[ 8] );
 		/* Low 8 bytes */
-		case  8: data2hex(string_1 + 21, (char) data[ 7] );
-		case  7: data2hex(string_1 + 18, (char) data[ 6] );
-		case  6: data2hex(string_1 + 15, (char) data[ 5] );
-		case  5: data2hex(string_1 + 12, (char) data[ 4] );
-		case  4: data2hex(string_1 +  9, (char) data[ 3] );
-		case  3: data2hex(string_1 +  6, (char) data[ 2] );
-		case  2: data2hex(string_1 +  3, (char) data[ 1] );
-		case  1: data2hex(string_1 +  0, (char) data[ 0] );
+		case  8: data2hex(string_1 + 21, (uint8_t) data[ 7] );
+		case  7: data2hex(string_1 + 18, (uint8_t) data[ 6] );
+		case  6: data2hex(string_1 + 15, (uint8_t) data[ 5] );
+		case  5: data2hex(string_1 + 12, (uint8_t) data[ 4] );
+		case  4: data2hex(string_1 +  9, (uint8_t) data[ 3] );
+		case  3: data2hex(string_1 +  6, (uint8_t) data[ 2] );
+		case  2: data2hex(string_1 +  3, (uint8_t) data[ 1] );
+		case  1: data2hex(string_1 +  0, (uint8_t) data[ 0] );
 	}
 
 	printf("[ %s %s] ", string_1, string_2 );
 }
 
-static void row2ascii(char* data, size_t len)
+static void row2ascii(uint8_t* data, size_t len)
 {
-	#define bin2ascii(b)  ( (char) ((b) >= 32 && (b) <= 126) ? (b) : '.' )
+	#define bin2ascii(b)  ( (uint8_t) ((b) >= 32 && (b) <= 126) ? (b) : '.' )
 
 	char str[17] ="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
@@ -106,15 +106,15 @@ static void printUsage(void)
 }
 
 
-void dump(char* buffer, long unsigned int size)
+void dump(uint8_t* buffer, size_t size)
 {
-	for (long unsigned int done = 0; done <= size; done += 16)
+	for (size_t done = 0; done <= size; done += 16)
 	{
-		char* data_current = (char*) (buffer + done);
-		long int todo = (size - done);
+		uint8_t* data_current = (uint8_t*) (buffer + done);
+		int64_t todo = (size - done);
 
 		if (todo <= 0) { printf("\n"); return; }
-		int line = (todo > 16) ? 16 : (todo);
+		int64_t line = (todo > 16) ? 16 : (todo);
 
 		// Print address + data as HEX + data as ASCII
 		printf("\t\t0x%.8lx: ", done);
