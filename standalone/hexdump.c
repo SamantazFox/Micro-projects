@@ -117,7 +117,7 @@ void dump(uint8_t* buffer, size_t size)
 		int64_t line = (todo > 16) ? 16 : (todo);
 
 		// Print address + data as HEX + data as ASCII
-		printf("\t\t0x%.8lx: ", done);
+		printf("0x%.8lx: ", done);
 		row2hex  (data_current, line);
 		row2ascii(data_current, line);
 	}
